@@ -16,9 +16,20 @@ import 'dotenv/config'
 import axios from 'axios';
 import { hexToBytes } from "@noble/hashes/utils";
 
+// Example: https://github.com/farcasterxyz/hub-monorepo/blob/main/packages/hub-nodejs/examples/write-data/index.ts
+
+// Signer private key registered with the Hub (see hello-world example)
+const SIGNER = process.env.SIGNER_PRIVATE_KEY;
+// Fid owned by the custody address
+const BOT_FID = process.env.BOT_FID; // <REQUIRED>
+
+// Testnet Configuration for submit
+const HUB_URL = "nemes.farcaster.xyz:2281"; // URL + Port of the Hub
+const NETWORK = FarcasterNetwork.MAINNET; // Network of the Hub
+
 
 // const hubAPI = process.env.HUB_ENDPOINT
-const hubAPI = 'https://nemes.farcaster.xyz:2281'
+const hubAPI = 'https://nemes.farcaster.xyz:2281' // for get
 // Want to use async/await? Add the `async` keyword to your outer function/method.
 export async function getCastsByMention(fid) {
   try {
@@ -35,20 +46,33 @@ export async function getCastsByMention(fid) {
   }
 }
 
-export async function submitMessage() {
+export async function submitMessage(castAdd) {
+  const client = getInsecureHubRpcClient(HUB_URL);
 
+  const response = await client.submitMessage(castAdd)
+  console.log('response', response);
+  return response
 }
 
 // https://github.com/farcasterxyz/hub-monorepo/blob/main/packages/hub-nodejs/examples/write-data/index.ts
 export async function makeCastAddWithMention(text, mentions, mentionsPositions) {
+  
+  const privateKeyBytes = hexToBytes(SIGNER.slice(2));
+  const ed25519Signer = new NobleEd25519Signer(privateKeyBytes);
+  const signerPublicKey = (await ed25519Signer.getSignerKey())._unsafeUnwrap();
+
+  const dataOptions = {
+    fid: BOT_FID,
+    network: NETWORK,
+  };
 
   const castWithMentions = await makeCastAdd(
     {
-      text: " and  are big fans of ",
+      text: text,
       embeds: [],
       embedsDeprecated: [],
-      mentions: [3, 2, 1],
-      mentionsPositions: [0, 5, 22],
+      mentions: mentions,
+      mentionsPositions: mentionsPositions,
     },
     dataOptions,
     ed25519Signer,
