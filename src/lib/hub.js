@@ -15,7 +15,9 @@ import {
 import 'dotenv/config'
 import axios from 'axios';
 import { hexToBytes } from "@noble/hashes/utils";
-
+import { EthersEip712Signer } from '@farcaster/hub-nodejs';
+import { Wallet } from 'ethers';
+import { fromBytes } from 'viem'
 // Example: https://github.com/farcasterxyz/hub-monorepo/blob/main/packages/hub-nodejs/examples/write-data/index.ts
 
 // Signer private key registered with the Hub (see hello-world example)
@@ -50,7 +52,7 @@ export async function submitMessage(castAdd) {
   const client = getInsecureHubRpcClient(HUB_URL);
 
   const response = await client.submitMessage(castAdd)
-  console.log('response', response);
+  console.log('submitMessage response', response);
   return response
 }
 
@@ -59,7 +61,20 @@ export async function makeCastAddWithMention(text, mentions, mentionsPositions) 
   
   const privateKeyBytes = hexToBytes(SIGNER.slice(2));
   const ed25519Signer = new NobleEd25519Signer(privateKeyBytes);
+  console.log('[hub.js:] get the signer:', ed25519Signer.toString())
+  console.log(ed25519Signer.fid)
+
+  const signerKeyResult = await ed25519Signer.getSignerKey();
+  if (signerKeyResult.isOk()) {
+    console.log('[hub.js]signerKeyResult value: ', signerKeyResult.value);
+    console.log('signerKeyResult fromBytes', fromBytes(signerKeyResult.value, 'hex'))
+  }
+
   const signerPublicKey = (await ed25519Signer.getSignerKey())._unsafeUnwrap();
+  console.log('[hub.js:] get the signerPublicKey:', signerPublicKey.toString())
+  console.log('[', signerPublicKey.hexToBytes)
+
+
 
   const dataOptions = {
     fid: BOT_FID,
@@ -77,6 +92,6 @@ export async function makeCastAddWithMention(text, mentions, mentionsPositions) 
     dataOptions,
     ed25519Signer,
   );
-  console.log(castWithMentions)
+  console.log('get the signed the message of castWithMentions:', castWithMentions)
   return castWithMentions
 }

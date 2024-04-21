@@ -1,26 +1,13 @@
-## Bot
-This is the bot of AttestCaster
+## AttestCaster Bot
+This is the bot of AttestCaster. It will monitor a schema ID from SignScan and then automatically post a cast to remind people that an attestation has been generated and posted.
+
 
 ## Start
-run `yarn start`
 
+1. Run cp .env.example .env and fill out the environmental variables.
 
-## AttestCaster Bot
+2. Run `yarn start`
 
-- Receive notification from indexer to post a cast on a bot account
-- The post should come with a Frame and show the attested content and link to a page to show the specific data
-- Also need to link to SignScan
+## Keys
 
-## Frame
-
-- Show the Attestation Content
-- Link to AttestCaster Page to show the content of the Attestation ID
-- Link to SignScan
-
-## AttestCaster App
-
-- Show the page by CastID
-- Allow user to Attest this cast with some content
-- Show user's attestaion
-- Allow user to query atestation by Attestation ID
-- Build by react, hosted in Vercel
+The signer key should be added to the user's Farcater's account.

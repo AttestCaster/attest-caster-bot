@@ -8,11 +8,6 @@ import * as fs from 'fs'
 const listToBePosted = []
 const fileStoragePath = './.lastHandledId'
 
-// give attestation id to see if it's already handled by robot
-const checkIfPosted = async (id) => {
-  
-}
-
 const getLastHandled = () => {
   try {
     const lastHandledId = fs.readFileSync(fileStoragePath, { encoding: 'ascii', 'flag': 'r+' })
@@ -104,27 +99,30 @@ const postCast = async (row) => {
 // Todo:: add lock and use better storage solution
 
 const main = async () => {
+  console.log('----------------------------------------------------')
+  console.log('start to run a new batch of operations')
   const list = await listenToSignSchema()
   const listToBePosted = list.reverse()
+  console.log('--- get the list to be posted --- length: ', listToBePosted.length)
   for (const row of listToBePosted) {
     try {
-      console.log('star to post on id:', row.id)
+      console.log('-- start to post on id:', row.id)
       const postInfo = await postCast(row)
+      if (!postInfo) {
+        console.log('-- failed to post - stop to operate this batch of operations', postInfo)
+        break;
+      }
       console.log('postInfo', postInfo)
       saveLastHandled(row.id)
     } catch(e) {
+      console.error('-- post on ', row.id, ' got an error:')
       console.error(e)
+      console.log('-- stop to operate this batch of operations')
       break;
     }
   }
   console.log('end of this round operations')
-  return
-  // Get notifications from Farcaster Hub
-  
-  // Handle each new mentioned cast
-
-  // Update / store records
-
+  console.log('----------------------------------------------------')
 }
 
 
